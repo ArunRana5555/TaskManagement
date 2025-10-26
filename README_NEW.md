@@ -17,7 +17,6 @@ Before you begin, ensure you have the following installed on your system:
 
 ```bash
 git clone <repository-url>
-cd Backend
 ```
 
 ### 2. Install Dependencies
@@ -59,7 +58,7 @@ The server will start on the port specified in your `.env` file (default: 4000).
 Once the server is running, you can access the API documentation at:
 
 ```
-http://localhost:4000/api-docs
+http://localhost:4000/docs
 ```
 
 ## Available Scripts
