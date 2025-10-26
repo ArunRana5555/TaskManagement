@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { add } = require('../utils/jwtBlackListed');
 const nodemailer = require('nodemailer');
+const { setCache, getCache } = require('../utils/redis');
 const Joi = require('joi');
 
 const transporter = nodemailer.createTransport({
@@ -155,16 +156,77 @@ const profile = async (req, res) => {
 };
 
 const allusers = async (req, res) => {
-  const users = await User.find({ userType: 'user' });
-  res.json(users);
+  try {
+    const cacheKey = 'allusers';
+    const cachedData = await getCache(cacheKey);
+    if (cachedData) {
+      return res.json(cachedData);
+    } else {
+      const users = await User.find({ userType: 'user' });
+      await setCache(cacheKey, users);
+      res.json(users);
+    }
+  } catch (error) {
+    console.error("Error in allusers controller:", error);
+    return res.status(500).json({ error: "Something went wrong" });
+  }
+  finally {
+    console.log('finally...')
+    const cacheKey = "allusers";
+    const users = await User.find({ userType: "user" });
+    await setCache(cacheKey, users);
+  }
 };
+
 const getManagerUsers = async (req, res) => {
-  const users = await User.find({ userType: 'user', underManager: req.user._id });
-  res.json(users);
+  try {
+    const cacheKey = 'getManagerUsers';
+    const cachedData = await getCache(cacheKey);
+    if (cachedData) {
+      return res.json(cachedData);
+    } else {
+      const users = await User.find({ userType: 'user', underManager: req.user._id });
+      await setCache(cacheKey, users);
+      res.json(users);
+    }
+  } catch (error) {
+    console.error("Error in getManagerUsers controller:", error);
+    return res.status(500).json({ error: "Something went wrong" });
+  }
+  finally {
+    console.log('finally...')
+    const cacheKey = "getManagerUsers";
+    const users = await User.find({ userType: "manager" });
+    await setCache(cacheKey, users);
+  }
 };
+
+
 const allmanagers = async (req, res) => {
-  const users = await User.find({ userType: 'manager' });
-  res.json(users);
+  try {
+    const cacheKey = "allmanagers";
+    const cachedData = await getCache(cacheKey);
+    if (cachedData) {
+      console.log('catched...')
+      return res.json(cachedData);
+    } else {
+      console.log('not catched...')
+      const users = await User.find({ userType: "manager" });
+      await setCache(cacheKey, users);
+      return res.json(users);
+    }
+
+  } catch (error) {
+    console.error("Error in allmanagers controller:", error);
+    return res.status(500).json({ error: "Something went wrong" });
+  }
+  finally {
+    console.log('finally...')
+    const cacheKey = "allmanagers";
+    const users = await User.find({ userType: "manager" });
+    await setCache(cacheKey, users);
+  }
 };
+
 
 module.exports = { signup, login, logout, profile, allusers, allmanagers, getManagerUsers };

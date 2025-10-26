@@ -10,6 +10,7 @@ const pusher = new Pusher({
 });
 
 const createTask = async (req, res) => {
+  try {
   const schema = Joi.object({
     title: Joi.string().required(),
     description: Joi.string().required(),
@@ -30,9 +31,14 @@ const createTask = async (req, res) => {
     });
   }
   res.status(201).json(task);
+  } catch (error) {
+    console.error("Error in createTask controller:", error);
+    return res.status(500).json({ error: "Something went wrong" });
+  }
 };
 
 const listTasks = async (req, res) => {
+  try {
   const schema = Joi.object({
     status: Joi.string().valid('Todo', 'In-Progress', 'Done').optional(),
     priority: Joi.string().valid('Low', 'Medium', 'High').optional(),
@@ -82,9 +88,14 @@ const listTasks = async (req, res) => {
     .limit(Number(limit));
 
   res.json({ total, page: Number(page), limit: Number(limit), tasks });
+  } catch (error) {
+    console.error("Error in listTasks controller:", error);
+    return res.status(500).json({ error: "Something went wrong" });
+  }
 };
 
 const updateTask = async (req, res) => {
+  try {
   const schema = Joi.object({
     title: Joi.string(),
     description: Joi.string(),
@@ -110,9 +121,14 @@ const updateTask = async (req, res) => {
     });
   }
   res.json(t);
+  } catch (error) {
+    console.error("Error in updateTask controller:", error);
+    return res.status(500).json({ error: "Something went wrong" });
+  }
 };
 
 const assigntask = async (req, res) => {
+  try {
   const schema = Joi.object({
     assignedTo: Joi.string().hex().length(24).allow('').allow(null).optional()
   });
@@ -140,17 +156,27 @@ const assigntask = async (req, res) => {
   }
 
   res.json(t);
+  } catch (error) {
+    console.error("Error in assigntask controller:", error);
+    return res.status(500).json({ error: "Something went wrong" });
+  }
 };
 
 const deleteTask = async (req, res) => {
+  try {
   const t = await Task.findById(req.params.id);
   if (!t) return res.status(404).json({ message: 'Not found' });
   if (!req.user.userType === 'admin' && !t.createdBy.equals(req.user._id)) return res.status(403).json({ message: 'Forbidden' });
   await t.deleteOne();
   res.json({ message: 'Deleted' });
+  } catch (error) {
+    console.error("Error in deleteTask controller:", error);
+    return res.status(500).json({ error: "Something went wrong" });
+  }
 };
 
 const updateStatus = async (req, res) => {
+  try {
   const schema = Joi.object({
     status: Joi.string().valid('Todo', 'In-Progress', 'Done').default('Todo'),
   });
@@ -165,9 +191,14 @@ const updateStatus = async (req, res) => {
   t.status = status;
   await t.save();
   res.json(t);
+  } catch (error) {
+    console.error("Error in updateStatus controller:", error);
+    return res.status(500).json({ error: "Something went wrong" });
+  }
 };
 
 const updatePriority = async (req, res) => {
+  try {
   const schema = Joi.object({
     priority: Joi.string().valid('Low', 'Medium', 'High').default('Medium'),
   });
@@ -182,5 +213,9 @@ const updatePriority = async (req, res) => {
   t.priority = priority;
   await t.save();
   res.json(t);
+  } catch (error) {
+    console.error("Error in updatePriority controller:", error);
+    return res.status(500).json({ error: "Something went wrong" });
+  }
 };
 module.exports = { createTask, listTasks, updateTask, deleteTask, updateStatus, updatePriority, assigntask };
