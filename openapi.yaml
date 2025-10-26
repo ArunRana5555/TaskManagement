@@ -1,0 +1,536 @@
+openapi: 3.0.0
+info:
+  title: Task Management API
+  version: 1.0.0
+  description: API for managing users and tasks
+
+servers:
+  - url: http://localhost:4000
+    description: Local server
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+paths:
+
+  # ===== USERS =====
+  /api/auth/v1/users/signup:
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - email
+                - userType
+                - underManager
+                - password
+              properties:
+                username:
+                  type: string
+                  example: john
+                email:
+                  type: string
+                  example: john@example.com
+                password:
+                  type: string
+                  example: StrongPass@123
+                userType:
+                  type: string
+                  example: user
+                underManager:
+                  type: string
+                  example: 64f12abc12345abcd678ef90
+      responses:
+        200:
+          description: User registered successfully
+
+  /api/auth/v1/users/login:
+    post:
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - identifier
+                - password
+              properties:
+                identifier:
+                  type: string
+                  example: john@example.com
+                password:
+                  type: string
+                  example: StrongPass@123
+      responses:
+        200:
+          description: Login successful
+
+  /api/auth/v1/users/logout:
+    post:
+      summary: Logout user 
+      security:
+        - BearerAuth: [] 
+      responses:
+        200:
+          description: Logout successful
+
+  /api/auth/v1/users/allusers:
+    get:
+      summary: Get all users
+      security:
+        - BearerAuth: [] 
+      responses:
+        200:
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    username:
+                      type: string
+                    email:
+                      type: string
+                    userType:
+                      type: string
+                    team:
+                      type: string
+
+  /api/auth/v1/users/allmanagers:
+    get:
+      summary: Get all managers
+      responses:
+        200:
+          description: List of managers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    username:
+                      type: string
+                    email:
+                      type: string
+                    userType:
+                      type: string
+                    team:
+                      type: string
+          responses:
+            200:
+              description: List of managers
+              content:
+                application/json:
+                  schema:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        username:
+                          type: string
+                        email:
+                          type: string
+                        userType:
+                          type: string
+                        team:
+                          type: string             
+
+  /api/auth/v1/users/getManagerUsers/{id}:
+    get:
+      summary: Get manager users
+      security:
+        - BearerAuth: [] 
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            example: 64f12abc12345abcd678ef90
+      responses:
+        200:
+          description: List of manager users
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  username:
+                    type: string
+                  email:
+                    type: string
+                  userType:
+                    type: string
+                  team:
+                    type: string
+          responses:
+            200:
+              description: List of manager users
+              content:
+                application/json:
+                  schema:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        username:
+                          type: string
+                        email:
+                          type: string
+                        userType:
+                          type: string
+                        team:
+                          type: string
+
+  /api/auth/v1/users/profile:
+    get:
+      summary: Get user profile
+      security:
+        - BearerAuth: [] 
+      responses:
+        200:
+          description: User profile
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  username:
+                    type: string
+                  email:
+                    type: string
+                  userType:
+                    type: string
+                  team:
+                    type: string
+          responses:
+            200:
+              description: User profile
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      username:
+                        type: string
+                      email:
+                        type: string
+                      userType:
+                        type: string
+                      team:
+                        type: string
+
+  # ===== TASKS =====
+
+  /api/auth/v1/tasks/createtask:
+    post:
+      summary: Create a new task
+      security:
+        - BearerAuth: [] 
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: Task title
+                description:
+                  type: string
+                  example: Task description
+                status:
+                  type: string
+                  enum: [Todo, In-Progress, Done]
+                  example: Todo
+                priority:
+                  type: string
+                  enum: [Low, Medium, High]
+                  example: Medium
+                assignedTo:
+                  type: string
+                  example: 64f12abc12345abcd678ef90
+      responses:
+        201:
+          description: Task created successfully
+
+  /api/auth/v1/tasks/listtasks:
+    get:
+      summary: Get all tasks for the logged-in user
+      security:
+        - BearerAuth: [] 
+      responses:
+        200:
+          description: List of tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    _id:
+                      type: string
+                    title:
+                      type: string
+                    description:
+                      type: string
+                    status:
+                      type: string
+                    priority:
+                      type: string
+                    assignedTo:
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                        username:
+                          type: string
+                    createdBy:
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                        username:
+                          type: string
+                    createdAt:
+                      type: string
+                      format: date-time
+
+  /api/auth/v1/tasks/updatetask/{id}:
+    put:
+      summary: Update a task
+      description: Update task details (title, description, status, priority, due date, assigned user). Only admin or owner can update tasks.
+      security:
+        - BearerAuth: [] 
+      parameters:
+        - name: id
+          in: path
+          description: Task ID to update
+          required: true
+          schema:
+            type: string
+            example: 64f12abc12345abcd678ef90
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: Update task title
+                description:
+                  type: string
+                  example: Update task description
+                status:
+                  type: string
+                  enum: [Todo, In-Progress, Done]
+                  example: In-Progress
+                priority:
+                  type: string
+                  enum: [Low, Medium, High]
+                  example: Medium
+                dueDate:
+                  type: string
+                  format: date
+                  example: 2025-10-31
+                assignedTo:
+                  type: string
+                  description: User ID to assign task to
+                  example: 64f12abc12345abcd678ef91
+      responses:
+        200:
+          description: Task updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _id:
+                    type: string
+                  title:
+                    type: string
+                  description:
+                    type: string
+                  status:
+                    type: string
+                  priority:
+                    type: string
+                  dueDate:
+                    type: string
+                    format: date
+                  assignedTo:
+                    type: object
+                    nullable: true
+                    properties:
+                      _id:
+                        type: string
+                      username:
+                        type: string
+                  createdBy:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                      username:
+                        type: string
+                  createdAt:
+                    type: string
+                    format: date-time
+                  updatedAt:
+                    type: string
+                    format: date-time
+        400:
+          description: Validation error
+        403:
+          description: Forbidden (user not authorized to update this task)
+        404:
+          description: Task not found
+
+  /api/auth/v1/tasks/assigntask/{id}:
+    put:
+      summary: Assign a task to a user
+      security:
+        - BearerAuth: [] 
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            example: 64f12abc12345abcd678ef90
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                assignedTo:
+                  type: string
+                  example: 64f12abc12345abcd678ef91
+      responses:
+        200:
+          description: Task assigned successfully
+
+  /api/auth/v1/tasks/updatestatus/{id}:
+    put:
+      summary: Update status of a task
+      security:
+        - BearerAuth: [] 
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            example: 64f12abc12345abcd678ef90
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [Todo, In-Progress, Done]
+                  example: In-Progress
+      responses:
+        200:
+          description: Task status updated successfully
+
+  /api/auth/v1/tasks/updatepriority/{id}:
+    put:
+      summary: Update priority of a task
+      security:
+        - BearerAuth: [] 
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            example: 64f12abc12345abcd678ef90
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                priority:
+                  type: string
+                  enum: [Low, Medium, High]
+                  example: Medium
+      responses:
+        200:
+          description: Task priority updated successfully
+
+  /api/auth/v1/tasks/deletetask/{id}:
+    delete:
+      summary: Delete a task
+      security:
+        - BearerAuth: [] 
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            example: 64f12abc12345abcd678ef90
+      responses:
+        200:
+          description: Task deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Task deleted successfully
+          responses:
+            200:
+              description: Task deleted successfully
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Task deleted successfully
+
+                         
